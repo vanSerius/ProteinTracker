@@ -34,7 +34,7 @@ export type Entry = {
   grams: number;
   proteinG: number;
   timestamp: number;
-  source?: 'food' | 'meal' | 'custom';
+  source?: 'food' | 'meal' | 'custom' | 'photo' | 'barcode';
 };
 
 export type MealIngredient = {

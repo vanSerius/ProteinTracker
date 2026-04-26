@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Camera } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { calculateGoal, kgToLb, lbToKg, type ActivityLevel, type GoalType, type WeightUnit } from '../lib/goal';
 import { clearAll } from '../lib/storage';
@@ -16,7 +18,8 @@ const GOAL: { value: GoalType; label: string; sub: string }[] = [
 ];
 
 export default function Profile() {
-  const { profile, update, dailyGoalG } = useApp();
+  const { profile, update, dailyGoalG, workerUrl, setWorker } = useApp();
+  const [draftWorker, setDraftWorker] = useState(workerUrl);
 
   const computed = calculateGoal(profile.weightKg, profile.activityLevel, profile.goalType);
   const usingOverride = profile.goalOverrideG !== undefined;
@@ -148,6 +151,41 @@ export default function Profile() {
             onChange={(e) => update({ goalOverrideG: Number(e.target.value) })}
             className="mt-2 w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-lg font-semibold tabular-nums"
           />
+        )}
+      </section>
+
+      <section className="mb-6 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 flex items-center gap-2">
+          <Camera size={16} /> Photo recognition (optional)
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+          Paste your Cloudflare Worker URL to enable plate-photo logging. See <code className="text-[11px]">worker/README.md</code> in the repo for the 10-minute setup.
+        </p>
+        <input
+          type="url"
+          inputMode="url"
+          placeholder="https://protein-tracker-worker.<you>.workers.dev"
+          value={draftWorker}
+          onChange={(e) => setDraftWorker(e.target.value)}
+          className="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm"
+        />
+        <button
+          onClick={() => setWorker(draftWorker)}
+          disabled={draftWorker === workerUrl}
+          className="w-full mt-2 py-2 rounded-xl bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white text-sm font-semibold"
+        >
+          {workerUrl && draftWorker === workerUrl ? 'Saved' : 'Save'}
+        </button>
+        {workerUrl && (
+          <button
+            onClick={() => {
+              setWorker('');
+              setDraftWorker('');
+            }}
+            className="w-full mt-2 py-2 rounded-xl text-slate-500 text-xs"
+          >
+            Remove
+          </button>
         )}
       </section>
 

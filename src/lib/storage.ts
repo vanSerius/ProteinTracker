@@ -32,7 +32,7 @@ export function remove(key: string): void {
 
 export function clearAll(): void {
   if (typeof window === 'undefined') return;
-  ['pt.profile', 'pt.entries', 'pt.customFoods', 'pt.favorites', 'pt.meals', VERSION_KEY].forEach((k) =>
+  ['pt.profile', 'pt.entries', 'pt.customFoods', 'pt.favorites', 'pt.meals', 'pt.workerUrl', VERSION_KEY].forEach((k) =>
     window.localStorage.removeItem(k),
   );
 }
@@ -43,4 +43,5 @@ export const KEYS = {
   customFoods: 'pt.customFoods',
   favorites: 'pt.favorites',
   meals: 'pt.meals',
+  workerUrl: 'pt.workerUrl',
 } as const;

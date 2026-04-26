@@ -1,0 +1,8 @@
+name = "protein-tracker-worker"
+main = "worker.ts"
+compatibility_date = "2025-01-01"
+
+# GEMINI_API_KEY is set as a secret via:  wrangler secret put GEMINI_API_KEY
+# Optional: lock CORS to your Pages origin (otherwise '*'):
+# [vars]
+# ALLOWED_ORIGIN = "https://vanserius.github.io"
