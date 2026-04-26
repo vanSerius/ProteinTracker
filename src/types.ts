@@ -1,11 +1,23 @@
 import type { ActivityLevel, GoalType, WeightUnit } from './lib/goal';
 
+export type Sex = 'female' | 'male' | 'other';
+
 export type Profile = {
   weightKg: number;
   weightUnit: WeightUnit;
   activityLevel: ActivityLevel;
   goalType: GoalType;
   goalOverrideG?: number;
+  heightCm?: number;
+  age?: number;
+  sex?: Sex;
+};
+
+export type User = {
+  id: string;
+  name: string;
+  profile: Profile;
+  workerUrl?: string;
 };
 
 export type ServingPreset = {

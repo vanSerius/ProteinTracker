@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, LogOut } from 'lucide-react';
 import { useApp } from '../AppContext';
 import { calculateGoal, kgToLb, lbToKg, type ActivityLevel, type GoalType, type WeightUnit } from '../lib/goal';
-import { clearAll } from '../lib/storage';
+import type { Sex } from '../types';
 
 const ACTIVITY: { value: ActivityLevel; label: string; sub: string }[] = [
   { value: 'sedentary', label: 'Sedentary', sub: 'desk job, little exercise' },
@@ -17,8 +17,14 @@ const GOAL: { value: GoalType; label: string; sub: string }[] = [
   { value: 'build_muscle', label: 'Build muscle', sub: 'gain lean mass' },
 ];
 
+const SEX: { value: Sex; label: string }[] = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+  { value: 'other', label: 'Other' },
+];
+
 export default function Profile() {
-  const { profile, update, dailyGoalG, workerUrl, setWorker } = useApp();
+  const { profile, update, dailyGoalG, workerUrl, setWorker, currentUser, setUserId } = useApp();
   const [draftWorker, setDraftWorker] = useState(workerUrl);
 
   const computed = calculateGoal(profile.weightKg, profile.activityLevel, profile.goalType);
@@ -31,16 +37,31 @@ export default function Profile() {
   };
   const displayWeight = profile.weightUnit === 'lb' ? kgToLb(profile.weightKg) : profile.weightKg;
 
-  const reset = () => {
-    if (confirm('Delete all data (profile, entries, foods, meals)? This cannot be undone.')) {
-      clearAll();
-      window.location.reload();
+  const switchUser = () => {
+    if (confirm('Zurück zur Benutzer-Auswahl?')) {
+      setUserId(null);
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Profile</h1>
+      <header className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center text-xl font-bold">
+            {currentUser?.name[0].toUpperCase() ?? '?'}
+          </div>
+          <div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Hi,</div>
+            <div className="text-xl font-bold">{currentUser?.name ?? 'Profile'}</div>
+          </div>
+        </div>
+        <button
+          onClick={switchUser}
+          className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700"
+        >
+          <LogOut size={14} /> Switch user
+        </button>
+      </header>
 
       <section className="mb-6">
         <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2">
@@ -155,6 +176,56 @@ export default function Profile() {
       </section>
 
       <section className="mb-6 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-3">
+          About you (optional)
+        </h2>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Height (cm)</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={100}
+              max={250}
+              step={1}
+              value={profile.heightCm ?? ''}
+              onChange={(e) => update({ heightCm: e.target.value ? Number(e.target.value) : undefined })}
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 tabular-nums"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Age</label>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={10}
+              max={120}
+              step={1}
+              value={profile.age ?? ''}
+              onChange={(e) => update({ age: e.target.value ? Number(e.target.value) : undefined })}
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 tabular-nums"
+            />
+          </div>
+        </div>
+        <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Sex</label>
+        <div className="flex gap-2">
+          {SEX.map((s) => (
+            <button
+              key={s.value}
+              onClick={() => update({ sex: profile.sex === s.value ? undefined : s.value })}
+              className={`flex-1 py-2 rounded-xl border text-sm font-semibold ${
+                profile.sex === s.value
+                  ? 'bg-brand-50 dark:bg-brand-700/20 border-brand-500 text-brand-700 dark:text-brand-500'
+                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-6 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
         <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide mb-2 flex items-center gap-2">
           <Camera size={16} /> Photo recognition (optional)
         </h2>
@@ -188,13 +259,6 @@ export default function Profile() {
           </button>
         )}
       </section>
-
-      <button
-        onClick={reset}
-        className="w-full py-3 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium border border-red-200 dark:border-red-900/40"
-      >
-        Reset all data
-      </button>
     </div>
   );
 }
